@@ -17,7 +17,6 @@
 
     <main class="game-layout">
 
-        <!-- LEFT PANEL -->
         <aside class="panel panel-left">
 
             <section class="panel-section">
@@ -31,7 +30,6 @@
                         </tr>
                     </thead>
                     <tbody id="scoreTableBody">
-                        <!-- rows inserted dynamically -->
                     </tbody>
                 </table>
             </section>
@@ -61,35 +59,29 @@
                         </tr>
                     </thead>
                     <tbody id="matchTableBody">
-                        <!-- rows inserted dynamically -->
                     </tbody>
                 </table>
             </section>
 
         </aside>
 
-        <!-- CENTER PANEL -->
         <section class="panel panel-center">
             <div id="gameBoard" class="game-board" role="grid" aria-label="Tabuleiro de cartas">
-                <!-- card elements inserted dynamically -->
             </div>
             <div id="statusMsg" class="status-msg"></div>
         </section>
 
-        <!-- RIGHT PANEL -->
         <aside class="panel panel-right">
 
             <section class="panel-section">
                 <h2 class="panel-title">Log da Partida</h2>
                 <ol id="gameLog" class="game-log">
-                    <!-- items inserted/removed dynamically -->
                 </ol>
             </section>
 
             <section class="panel-section">
                 <h2 class="panel-title">Cartas Restantes</h2>
                 <ul id="remainingList" class="remaining-list">
-                    <!-- items removed dynamically as pairs are found -->
                 </ul>
             </section>
 
@@ -97,7 +89,6 @@
 
     </main>
 
-    <!-- Game Over Modal -->
     <div id="gameOverModal" class="modal-overlay hidden">
         <div class="modal">
             <h2 id="modalTitle" class="modal-title">Fim de Jogo!</h2>

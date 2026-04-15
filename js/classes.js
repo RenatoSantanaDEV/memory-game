@@ -1,19 +1,6 @@
-/* ============================================================
-   CLASSES.JS — Game model (pure logic, no DOM)
-   ============================================================ */
-
 'use strict';
 
-/* ----------------------------------------------------------
-   Card
-   Represents a single card on the board.
-   ---------------------------------------------------------- */
 class Card {
-    /**
-     * @param {number} id      - Unique index on the board (0 … n-1)
-     * @param {string} symbol  - Emoji/character displayed when face-up
-     * @param {number} pairId  - Shared ID between the two matching cards
-     */
     constructor(id, symbol, pairId) {
         this.id        = id;
         this.symbol    = symbol;
@@ -22,61 +9,42 @@ class Card {
         this.isMatched = false;
     }
 
-    /** Turn the card face-up (not permanently). */
     flip() {
         this.isFlipped = true;
     }
 
-    /** Turn the card face-down again (after a failed attempt). */
     unflip() {
         this.isFlipped = false;
     }
 
-    /** Mark the card as permanently matched. */
     match() {
         this.isMatched = true;
         this.isFlipped = true;
     }
 }
 
-/* ----------------------------------------------------------
-   Player
-   Represents one human player.
-   ---------------------------------------------------------- */
 class Player {
-    /**
-     * @param {number} id   - 1 or 2
-     * @param {string} name - Display name
-     */
     constructor(id, name) {
         this.id       = id;
         this.name     = name;
-        this.score    = 0;   // number of matched pairs
-        this.attempts = 0;   // number of turns taken
+        this.score    = 0;
+        this.attempts = 0;
     }
 
-    /** Called every time the player reveals their second card. */
     recordAttempt() {
         this.attempts++;
     }
 
-    /** Called when the player successfully finds a pair. */
     addPair() {
         this.score++;
     }
 
-    /** Resets stats for a new game. */
     reset() {
         this.score    = 0;
         this.attempts = 0;
     }
 }
 
-/* ----------------------------------------------------------
-   MemoryGame
-   Central game model.  Holds all state and exposes the
-   minimal public API that game.js calls.
-   ---------------------------------------------------------- */
 class MemoryGame {
 
     static SYMBOLS = [
@@ -86,37 +54,24 @@ class MemoryGame {
         '🍉', '🐉', '🏆', '🎭'
     ];
 
-    static TOTAL_PAIRS = 8;  // → 16 cards on the board
+    static TOTAL_PAIRS = 8;
 
-    /**
-     * @param {string} name1 - Player 1 name
-     * @param {string} name2 - Player 2 name
-     */
     constructor(name1, name2) {
         this.players     = [ new Player(1, name1), new Player(2, name2) ];
         this.cards       = [];
         this.flippedCards = [];
-        this.currentIdx  = 0;   // index into this.players
+        this.currentIdx  = 0;
         this.matchCount  = 0;
         this.isLocked    = false;
         this.isOver      = false;
-        this.matchHistory = [];  // { number, playerName, playerId, symbol }
-        this.eventLog     = [];  // { id, message }
+        this.matchHistory = [];
+        this.eventLog     = [];
     }
-
-    /* ---------- Accessors ---------- */
 
     get currentPlayer() {
         return this.players[this.currentIdx];
     }
 
-    /* ---------- Setup ---------- */
-
-    /**
-     * Shuffles symbols into pairs, creates Card instances, and logs
-     * the opening message.
-     * @returns {Card[]} the array of cards (in board order)
-     */
     initialize() {
         const symbols  = MemoryGame.SYMBOLS.slice(0, MemoryGame.TOTAL_PAIRS);
         const pairs    = [...symbols, ...symbols];
@@ -131,7 +86,6 @@ class MemoryGame {
         return this.cards;
     }
 
-    /** Fisher-Yates in-place shuffle. */
     static _shuffle(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -139,18 +93,6 @@ class MemoryGame {
         }
     }
 
-    /* ---------- Core turn logic ---------- */
-
-    /**
-     * Attempt to flip card at index `cardId`.
-     *
-     * Returns an action descriptor object:
-     *   { action: 'locked' | 'invalid' | 'first' | 'match' | 'no-match' | 'game-over',
-     *     card,          ← the flipped card (when applicable)
-     *     matchEntry,    ← filled on 'match' / 'game-over'
-     *     mismatchCards  ← [Card, Card] on 'no-match'
-     *   }
-     */
     attemptFlip(cardId) {
         if (this.isLocked)  return { action: 'locked' };
 
@@ -160,12 +102,10 @@ class MemoryGame {
         card.flip();
         this.flippedCards.push(card);
 
-        /* First card of the turn — just show it. */
         if (this.flippedCards.length === 1) {
             return { action: 'first', card };
         }
 
-        /* Second card — evaluate the pair. */
         this.isLocked = true;
         this.currentPlayer.recordAttempt();
 
@@ -198,15 +138,10 @@ class MemoryGame {
             return { action: 'match', card, matchEntry };
         }
 
-        /* No match — cards will be hidden after a short delay by game.js. */
         this._log(`✗ ${this.currentPlayer.name} errou (${c1.symbol} ≠ ${c2.symbol})`);
         return { action: 'no-match', card, mismatchCards: [c1, c2] };
     }
 
-    /**
-     * Called by game.js after the "no-match" animation delay.
-     * Hides the two failed cards and passes the turn.
-     */
     resolveNoMatch() {
         const [c1, c2] = this.flippedCards;
         c1.unflip();
@@ -216,7 +151,6 @@ class MemoryGame {
         this._switchPlayer();
     }
 
-    /** Returns the winning Player, or null on a tie. */
     getWinner() {
         const [p1, p2] = this.players;
         if (p1.score > p2.score) return p1;
@@ -224,10 +158,6 @@ class MemoryGame {
         return null;
     }
 
-    /**
-     * Returns the set of unmatched symbols still on the board.
-     * @returns {string[]}
-     */
     getRemainingSymbols() {
         const seen = new Set();
         const result = [];
@@ -240,10 +170,6 @@ class MemoryGame {
         return result;
     }
 
-    /**
-     * Resets everything and starts a fresh round with the same players.
-     * @returns {Card[]} new shuffled card array
-     */
     restart() {
         this.players.forEach(p => p.reset());
         this.cards        = [];
@@ -256,8 +182,6 @@ class MemoryGame {
         this.eventLog     = [];
         return this.initialize();
     }
-
-    /* ---------- Private helpers ---------- */
 
     _switchPlayer() {
         this.currentIdx = this.currentIdx === 0 ? 1 : 0;
