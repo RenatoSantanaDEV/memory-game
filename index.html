@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="hero-title">
+            <div class="card-suits">♠ ♥ ♦ ♣</div>
+            <h1>Jogo da Memória</h1>
+            <p class="tagline">Desafie sua memória contra um amigo!</p>
+        </div>
+
+        <div class="setup-container">
+            <div class="players-row">
+                <div class="player-card" id="card-p1">
+                    <div class="player-avatar p1-avatar">P1</div>
+                    <h2>Jogador 1</h2>
+                    <input
+                        type="text"
+                        id="player1Name"
+                        class="name-input"
+                        placeholder="Digite seu nome..."
+                        maxlength="20"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="vs-badge">VS</div>
+
+                <div class="player-card" id="card-p2">
+                    <div class="player-avatar p2-avatar">P2</div>
+                    <h2>Jogador 2</h2>
+                    <input
+                        type="text"
+                        id="player2Name"
+                        class="name-input"
+                        placeholder="Digite seu nome..."
+                        maxlength="20"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <p id="errorMsg" class="error-msg" aria-live="polite"></p>
+
+            <button id="startBtn" class="start-btn">
+                <span class="btn-icon">▶</span>
+                Iniciar Jogo
+            </button>
+        </div>
+
+        <div class="rules-card">
+            <h3>Como Jogar</h3>
+            <ul id="rulesList" class="rules-list">
+                <li>Os jogadores se alternam, virando duas cartas por vez.</li>
+                <li>Se as cartas forem iguais, o jogador marca ponto e joga novamente.</li>
+                <li>Se forem diferentes, as cartas são viradas de volta e a vez passa.</li>
+                <li>Vence quem encontrar mais pares ao final!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/index.js"></script>
+</body>
+</html>

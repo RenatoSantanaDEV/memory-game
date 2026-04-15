@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória — Partida</title>
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <header class="game-header">
+        <div class="header-left">
+            <span class="header-suits">♠ ♥ ♦ ♣</span>
+            <h1 class="header-title">Jogo da Memória</h1>
+        </div>
+        <button id="restartBtn" class="restart-btn">↺ Nova Partida</button>
+    </header>
+
+    <main class="game-layout">
+
+        <!-- LEFT PANEL -->
+        <aside class="panel panel-left">
+
+            <section class="panel-section">
+                <h2 class="panel-title">Placar</h2>
+                <table id="scoreTable" class="score-table">
+                    <thead>
+                        <tr>
+                            <th>Jogador</th>
+                            <th>Pares</th>
+                            <th>Tent.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreTableBody">
+                        <!-- rows inserted dynamically -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="panel-section">
+                <h2 class="panel-title">Vez de Jogar</h2>
+                <div class="turn-box">
+                    <div id="turnP1" class="turn-player turn-p1">
+                        <span class="turn-suit">♠</span>
+                        <span id="turnP1Name">Jogador 1</span>
+                    </div>
+                    <div id="turnP2" class="turn-player turn-p2">
+                        <span class="turn-suit">♥</span>
+                        <span id="turnP2Name">Jogador 2</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel-section">
+                <h2 class="panel-title">Pares Encontrados</h2>
+                <table id="matchTable" class="match-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Jogador</th>
+                            <th>Par</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matchTableBody">
+                        <!-- rows inserted dynamically -->
+                    </tbody>
+                </table>
+            </section>
+
+        </aside>
+
+        <!-- CENTER PANEL -->
+        <section class="panel panel-center">
+            <div id="gameBoard" class="game-board" role="grid" aria-label="Tabuleiro de cartas">
+                <!-- card elements inserted dynamically -->
+            </div>
+            <div id="statusMsg" class="status-msg"></div>
+        </section>
+
+        <!-- RIGHT PANEL -->
+        <aside class="panel panel-right">
+
+            <section class="panel-section">
+                <h2 class="panel-title">Log da Partida</h2>
+                <ol id="gameLog" class="game-log">
+                    <!-- items inserted/removed dynamically -->
+                </ol>
+            </section>
+
+            <section class="panel-section">
+                <h2 class="panel-title">Cartas Restantes</h2>
+                <ul id="remainingList" class="remaining-list">
+                    <!-- items removed dynamically as pairs are found -->
+                </ul>
+            </section>
+
+        </aside>
+
+    </main>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2 id="modalTitle" class="modal-title">Fim de Jogo!</h2>
+            <p id="modalSubtitle" class="modal-subtitle"></p>
+            <div id="modalScores" class="modal-scores"></div>
+            <button id="playAgainBtn" class="start-btn">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script src="js/classes.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

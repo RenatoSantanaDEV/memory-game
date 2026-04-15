@@ -1,0 +1,653 @@
+/* ============================================================
+   GAME.CSS — Game page
+   ============================================================ */
+
+/* ---------- Reset & Variables ---------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --felt:         #0e1f14;
+    --felt-mid:     #152a1c;
+    --felt-light:   #1d3a26;
+    --felt-border:  #264433;
+    --gold:         #c9a227;
+    --gold-light:   #f0c040;
+    --gold-dim:     #8a6e1a;
+    --p1-color:     #4a9eff;
+    --p1-bg:        #0d2548;
+    --p2-color:     #ff5a5a;
+    --p2-bg:        #3a0d0d;
+    --match-color:  #34d399;
+    --match-bg:     #052e1c;
+    --text-bright:  #f0ead6;
+    --text-muted:   #8aaa8a;
+    --border:       rgba(201, 162, 39, 0.28);
+    --shadow:       0 6px 24px rgba(0, 0, 0, 0.55);
+    --radius:       10px;
+    --font-main:    'Georgia', serif;
+    --font-ui:      'Segoe UI', 'Arial', sans-serif;
+
+    /* card dimensions */
+    --card-w: 88px;
+    --card-h: 112px;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--felt);
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(21, 42, 28, 0.8) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 50%, rgba(29, 58, 38, 0.6) 0%, transparent 55%);
+    color: var(--text-bright);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--felt-mid);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.header-suits {
+    color: var(--gold);
+    font-size: 1.15rem;
+    letter-spacing: 6px;
+}
+
+.header-title {
+    font-family: var(--font-main);
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    text-shadow: 0 0 16px rgba(201, 162, 39, 0.4);
+    letter-spacing: 1px;
+}
+
+.restart-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--gold);
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    padding: 8px 18px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.restart-btn:hover {
+    background: rgba(201, 162, 39, 0.12);
+    border-color: var(--gold);
+    color: var(--gold-light);
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.game-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    grid-template-rows: 1fr;
+    gap: 0;
+    overflow: hidden;
+}
+
+/* ============================================================
+   PANELS
+   ============================================================ */
+.panel {
+    padding: 16px 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.panel-left, .panel-right {
+    background: var(--felt-mid);
+    border-right: 1px solid var(--felt-border);
+}
+
+.panel-right {
+    border-right: none;
+    border-left: 1px solid var(--felt-border);
+}
+
+.panel-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px;
+}
+
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.panel-title {
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================
+   SCORE TABLE
+   ============================================================ */
+.score-table,
+.match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.score-table th,
+.match-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 5px 7px;
+    text-align: left;
+    border-bottom: 1px solid var(--felt-border);
+    letter-spacing: 0.4px;
+}
+
+.score-table td,
+.match-table td {
+    padding: 7px 7px;
+    border-bottom: 1px solid rgba(38, 68, 51, 0.5);
+    vertical-align: middle;
+    transition: background 0.3s;
+}
+
+.score-table tr.active-row td {
+    background: rgba(201, 162, 39, 0.08);
+}
+
+.score-table td.score-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    text-align: center;
+}
+
+.score-table td.p1-name { color: var(--p1-color); }
+.score-table td.p2-name { color: var(--p2-color); }
+
+.match-table td:first-child {
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.match-table td.symbol-cell {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.match-row-p1 td { color: var(--p1-color); }
+.match-row-p2 td { color: var(--p2-color); }
+
+/* new-row flash animation */
+@keyframes rowFlash {
+    from { background: rgba(52, 211, 153, 0.25); }
+    to   { background: transparent; }
+}
+
+.row-flash {
+    animation: rowFlash 0.8s ease forwards;
+}
+
+/* ============================================================
+   TURN INDICATOR
+   ============================================================ */
+.turn-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.turn-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.35s ease;
+    opacity: 0.42;
+    letter-spacing: 0.3px;
+}
+
+.turn-player.active-turn {
+    opacity: 1;
+    animation: turnPulse 2s ease-in-out infinite;
+}
+
+.turn-p1 { color: var(--p1-color); }
+.turn-p2 { color: var(--p2-color); }
+
+.turn-p1.active-turn {
+    background: var(--p1-bg);
+    border-color: rgba(74, 158, 255, 0.45);
+    box-shadow: 0 0 12px rgba(74, 158, 255, 0.2);
+}
+
+.turn-p2.active-turn {
+    background: var(--p2-bg);
+    border-color: rgba(255, 90, 90, 0.45);
+    box-shadow: 0 0 12px rgba(255, 90, 90, 0.2);
+}
+
+.turn-suit {
+    font-size: 1.1rem;
+}
+
+@keyframes turnPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.08); }
+    50%       { box-shadow: 0 0 18px rgba(255, 255, 255, 0.22); }
+}
+
+/* ============================================================
+   GAME LOG (ordered list)
+   ============================================================ */
+.game-log {
+    list-style: decimal inside;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.game-log::-webkit-scrollbar { width: 4px; }
+.game-log::-webkit-scrollbar-track { background: transparent; }
+.game-log::-webkit-scrollbar-thumb { background: var(--felt-border); border-radius: 2px; }
+
+.log-item {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding: 4px 6px;
+    border-radius: 4px;
+    line-height: 1.4;
+    transition: background 0.2s;
+    animation: logSlide 0.3s ease;
+}
+
+@keyframes logSlide {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.log-item.log-match {
+    color: var(--match-color);
+    background: rgba(52, 211, 153, 0.07);
+}
+
+.log-item.log-miss {
+    color: #ff8888;
+    background: rgba(255, 90, 90, 0.06);
+}
+
+/* ============================================================
+   REMAINING CARDS (unordered list)
+   ============================================================ */
+.remaining-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+}
+
+.remaining-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--felt-light);
+    border: 1px solid var(--felt-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    animation: tagAppear 0.3s ease;
+    transition: opacity 0.4s, transform 0.4s;
+}
+
+@keyframes tagAppear {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.remaining-item.removing {
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+.remaining-symbol { font-size: 1.1rem; }
+.remaining-count  { color: var(--text-muted); font-size: 0.72rem; }
+
+/* ============================================================
+   GAME BOARD & CARDS
+   ============================================================ */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, var(--card-w));
+    grid-template-rows: repeat(4, var(--card-h));
+    gap: 12px;
+}
+
+/* ---------- Individual card ---------- */
+.card {
+    width: var(--card-w);
+    height: var(--card-h);
+    perspective: 700px;
+    cursor: pointer;
+    animation: cardAppear 0.4s ease both;
+}
+
+/* Staggered appear delays — keep CSS/JS separation complete */
+.card:nth-child(1)  { animation-delay:   0ms; }
+.card:nth-child(2)  { animation-delay:  35ms; }
+.card:nth-child(3)  { animation-delay:  70ms; }
+.card:nth-child(4)  { animation-delay: 105ms; }
+.card:nth-child(5)  { animation-delay: 140ms; }
+.card:nth-child(6)  { animation-delay: 175ms; }
+.card:nth-child(7)  { animation-delay: 210ms; }
+.card:nth-child(8)  { animation-delay: 245ms; }
+.card:nth-child(9)  { animation-delay: 280ms; }
+.card:nth-child(10) { animation-delay: 315ms; }
+.card:nth-child(11) { animation-delay: 350ms; }
+.card:nth-child(12) { animation-delay: 385ms; }
+.card:nth-child(13) { animation-delay: 420ms; }
+.card:nth-child(14) { animation-delay: 455ms; }
+.card:nth-child(15) { animation-delay: 490ms; }
+.card:nth-child(16) { animation-delay: 525ms; }
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1.0);
+    border-radius: 8px;
+}
+
+.card.flipped .card-inner,
+.card.matched .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-face-down,
+.card-face-up {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    user-select: none;
+}
+
+/* Face-down side (back of card, shown by default) */
+.card-face-down {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #0d2050 0px, #0d2050 8px,
+            #0d2a65 8px, #0d2a65 16px
+        );
+    border: 2px solid #1a3a8a;
+    box-shadow: inset 0 0 18px rgba(0, 0, 80, 0.4);
+    font-size: 1.6rem;
+    color: rgba(74, 130, 255, 0.5);
+}
+
+/* Face-up side (front of card, shown when flipped) */
+.card-face-up {
+    background: linear-gradient(145deg, #fff9ec, #fffae8);
+    border: 2px solid #d4a017;
+    transform: rotateY(180deg);
+    font-size: 2.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+}
+
+/* Hover effect (only when not matched) */
+.card:not(.matched):hover .card-inner {
+    box-shadow: 0 0 14px rgba(201, 162, 39, 0.45);
+    transform: translateY(-3px);
+}
+
+.card.flipped:not(.matched):hover .card-inner {
+    transform: rotateY(180deg) translateY(-3px);
+}
+
+/* Matched card state */
+.card.matched .card-face-up {
+    background: linear-gradient(145deg, #d1fae5, #a7f3d0);
+    border-color: var(--match-color);
+}
+
+@keyframes matchGlow {
+    0%   { box-shadow: 0 0 0 rgba(52, 211, 153, 0.0); }
+    40%  { box-shadow: 0 0 22px rgba(52, 211, 153, 0.7); }
+    100% { box-shadow: 0 0 8px rgba(52, 211, 153, 0.3); }
+}
+
+.card.matched .card-inner {
+    animation: matchGlow 0.7s ease forwards;
+}
+
+/* Card appear animation (staggered when board loads) */
+@keyframes cardAppear {
+    from { opacity: 0; transform: scale(0.7) rotateY(-30deg); }
+    to   { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+/* ============================================================
+   STATUS MESSAGE
+   ============================================================ */
+.status-msg {
+    font-family: var(--font-main);
+    font-size: 1rem;
+    color: var(--gold);
+    min-height: 1.4em;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.status-msg.animating {
+    animation: fadeMsg 0.4s ease;
+}
+
+@keyframes fadeMsg {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   GAME OVER MODAL
+   ============================================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: overlayIn 0.3s ease;
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal {
+    background: var(--felt-mid);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 44px 52px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+    animation: modalSlide 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.0);
+    max-width: 400px;
+    width: 90%;
+}
+
+@keyframes modalSlide {
+    from { transform: translateY(-30px) scale(0.92); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-title {
+    font-family: var(--font-main);
+    font-size: 2rem;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(201, 162, 39, 0.5);
+}
+
+.modal-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.modal-scores {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.final-score-item {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--felt-border);
+    min-width: 120px;
+    text-align: center;
+}
+
+.final-score-item.winner {
+    border-color: var(--gold);
+    background: rgba(201, 162, 39, 0.1);
+    box-shadow: 0 0 16px rgba(201, 162, 39, 0.3);
+}
+
+.final-score-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.final-score-val {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--gold-light);
+}
+
+.final-score-item.winner .final-score-val { color: var(--gold-light); }
+
+/* Start / Play again button (reused from index) */
+.start-btn {
+    background: linear-gradient(135deg, var(--gold-dim) 0%, var(--gold) 100%);
+    color: #1a1008;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 44px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.45);
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201, 162, 39, 0.6);
+    filter: brightness(1.08);
+}
+
+/* ============================================================
+   SCROLLBAR STYLING
+   ============================================================ */
+.panel::-webkit-scrollbar { width: 4px; }
+.panel::-webkit-scrollbar-track { background: transparent; }
+.panel::-webkit-scrollbar-thumb { background: var(--felt-border); border-radius: 2px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 960px) {
+    .game-layout {
+        grid-template-columns: 200px 1fr 200px;
+    }
+
+    :root {
+        --card-w: 72px;
+        --card-h: 90px;
+    }
+}
+
+@media (max-width: 720px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        overflow-y: auto;
+    }
+
+    .panel-left  { order: 2; border-right: none; border-bottom: 1px solid var(--felt-border); }
+    .panel-center { order: 1; }
+    .panel-right  { order: 3; border-left: none; border-top: 1px solid var(--felt-border); }
+
+    :root {
+        --card-w: 64px;
+        --card-h: 82px;
+    }
+
+    .game-board { gap: 8px; }
+}
