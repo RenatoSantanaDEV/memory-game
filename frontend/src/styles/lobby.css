@@ -1,0 +1,288 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --felt:        #0e1f14;
+    --felt-mid:    #152a1c;
+    --felt-light:  #1d3a26;
+    --gold:        #c9a227;
+    --gold-light:  #f0c040;
+    --gold-dim:    #8a6e1a;
+    --p1-color:    #4a9eff;
+    --p2-color:    #ff5a5a;
+    --text-bright: #f0ead6;
+    --text-muted:  #9aad9a;
+    --border:      rgba(201, 162, 39, 0.35);
+    --shadow:      0 8px 32px rgba(0, 0, 0, 0.6);
+    --radius:      12px;
+    --font-main:   'Georgia', serif;
+    --font-ui:     'Segoe UI', 'Arial', sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--felt);
+    background-image:
+        radial-gradient(ellipse at 30% 20%, rgba(21, 42, 28, 0.9) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(29, 58, 38, 0.7) 0%, transparent 60%);
+    color: var(--text-bright);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* ── WRAPPER ─────────────────────────────────────────────────────────────────── */
+
+.page-wrapper {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+/* ── HERO ────────────────────────────────────────────────────────────────────── */
+
+.hero-title {
+    text-align: center;
+}
+
+.card-suits {
+    font-size: 2rem;
+    letter-spacing: 12px;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 8px;
+    animation: suitFloat 3s ease-in-out infinite;
+}
+
+@keyframes suitFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
+.hero-title h1 {
+    font-family: var(--font-main);
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    color: var(--gold-light);
+    text-shadow: 0 0 24px rgba(201, 162, 39, 0.5);
+    letter-spacing: 2px;
+}
+
+.tagline {
+    margin-top: 6px;
+    font-size: 1rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+/* ── PAINEL DE CONFIGURAÇÃO ──────────────────────────────────────────────────── */
+
+.setup-container {
+    width: 100%;
+    background: var(--felt-mid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 40px 32px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ── ABAS CRIAR / ENTRAR ─────────────────────────────────────────────────────── */
+
+.mode-tabs {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.mode-tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.mode-tab.active {
+    background: rgba(201, 162, 39, 0.15);
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
+.mode-tab:not(.active):hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-bright);
+}
+
+/* ── FORMULÁRIO ──────────────────────────────────────────────────────────────── */
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.name-input,
+.code-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(201, 162, 39, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-bright);
+    font-size: 1rem;
+    font-family: var(--font-ui);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.code-input {
+    text-align: center;
+    letter-spacing: 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.name-input::placeholder,
+.code-input::placeholder {
+    color: rgba(154, 173, 154, 0.5);
+    letter-spacing: normal;
+}
+
+.name-input:focus,
+.code-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(201, 162, 39, 0.3);
+}
+
+.name-input.invalid,
+.code-input.invalid {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+}
+
+/* ── BOTÃO PRINCIPAL ─────────────────────────────────────────────────────────── */
+
+.start-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold-dim) 0%, var(--gold) 100%);
+    color: #1a1008;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    box-shadow: 0 4px 16px rgba(201, 162, 39, 0.45);
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201, 162, 39, 0.6);
+    filter: brightness(1.08);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+}
+
+.start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── MENSAGEM DE ERRO ────────────────────────────────────────────────────────── */
+
+.error-msg {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    text-align: center;
+    min-height: 1.2em;
+    letter-spacing: 0.3px;
+}
+
+/* ── REGRAS ──────────────────────────────────────────────────────────────────── */
+
+.rules-card {
+    width: 100%;
+    background: var(--felt-mid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 32px;
+    box-shadow: var(--shadow);
+}
+
+.rules-card h3 {
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+}
+
+.rules-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 0;
+}
+
+.rules-list li {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding-left: 22px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.rules-list li::before {
+    content: '♦';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+    font-size: 0.75rem;
+    top: 3px;
+}
+
+/* ── RESPONSIVO ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 520px) {
+    .setup-container {
+        padding: 24px 20px;
+    }
+}
