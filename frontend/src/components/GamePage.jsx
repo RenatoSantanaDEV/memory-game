@@ -12,27 +12,29 @@ import GameOverModal from './GameOverModal';
 import GameFooter from './GameFooter';
 import SettingsModal from './SettingsModal';
 
+const GAME_DURATION = 600; // 10 minutos em segundos
+
 export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCode }) {
   const { cards, players, currentPlayerIndex, isLocked, flippedCardIds, phase } = gameState;
 
-  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(GAME_DURATION);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
   const isMyTurn = players[currentPlayerIndex]?.id === mySocketId;
 
-  // Timer — stops when game ends
+  // Countdown — para quando o jogo acaba ou o tempo zera
   useEffect(() => {
     if (phase === 'over') return;
-    const id = setInterval(() => setTimeElapsed(t => t + 1), 1000);
+    const id = setInterval(() => setTimeRemaining(t => (t > 0 ? t - 1 : 0)), 1000);
     return () => clearInterval(id);
   }, [phase]);
 
-  // Reset timer when a new game starts (matchHistory empties and eventLog resets)
+  // Reseta o countdown quando uma nova partida começa
   useEffect(() => {
     if (gameState.matchHistory.length === 0 && gameState.eventLog.length <= 1) {
-      setTimeElapsed(0);
+      setTimeRemaining(GAME_DURATION);
     }
   }, [gameState.matchHistory.length, gameState.eventLog.length]);
 
@@ -104,7 +106,7 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
         </aside>
 
         <section className="panel-center">
-          <div className="game-board">
+          <div className={`game-board board-p${currentPlayerIndex + 1}`}>
             {cards.map((card) => (
               <Card
                 key={card.id}
@@ -126,7 +128,7 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
       </main>
 
       <GameFooter
-        timeElapsed={timeElapsed}
+        timeRemaining={timeRemaining}
         gameState={gameState}
         soundEnabled={soundEnabled}
         onSoundToggle={() => setSoundEnabled(s => !s)}
@@ -139,7 +141,7 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
           gameState={gameState}
           roomCode={roomCode}
           mySocketId={mySocketId}
-          timeElapsed={timeElapsed}
+          timeElapsed={GAME_DURATION - timeRemaining}
         />
       )}
 

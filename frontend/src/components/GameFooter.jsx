@@ -1,12 +1,13 @@
-export default function GameFooter({ timeElapsed, gameState, soundEnabled, onSoundToggle, onLeave, onRestart }) {
+export default function GameFooter({ timeRemaining, gameState, soundEnabled, onSoundToggle, onLeave, onRestart }) {
   const { players, matchHistory, cards } = gameState;
 
   const totalAttempts = players.reduce((sum, p) => sum + p.attempts, 0);
   const totalPairs = cards ? cards.length / 2 : 10;
   const pairsFound = matchHistory ? matchHistory.length : 0;
 
-  const minutes = String(Math.floor(timeElapsed / 60)).padStart(2, '0');
-  const seconds = String(timeElapsed % 60).padStart(2, '0');
+  const minutes = String(Math.floor(timeRemaining / 60)).padStart(2, '0');
+  const seconds = String(timeRemaining % 60).padStart(2, '0');
+  const isUrgent = timeRemaining <= 60;
 
   return (
     <footer className="game-footer">
@@ -34,7 +35,9 @@ export default function GameFooter({ timeElapsed, gameState, soundEnabled, onSou
         </div>
         <div className="footer-stat">
           <span className="footer-stat-label">Tempo</span>
-          <span className="footer-stat-value">⏱ {minutes}:{seconds}</span>
+          <span className={`footer-stat-value${isUrgent ? ' time-urgent' : ''}`}>
+            ⏱ {minutes}:{seconds}
+          </span>
         </div>
       </div>
 
