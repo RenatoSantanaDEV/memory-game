@@ -3,22 +3,35 @@ import socket from './socket';
 import LobbyPage from './components/LobbyPage';
 import WaitingPage from './components/WaitingPage';
 import GamePage from './components/GamePage';
+import AbandonedScreen from './components/AbandonedScreen';
 
-// Máquina de estados: 'lobby' | 'waiting' | 'game'
+// Garante que cada aba tem um ID único persistente durante a sessão
+// sessionStorage sobrevive a F5, mas não a fechar e reabrir a aba
+if (!sessionStorage.getItem('tabId')) {
+  sessionStorage.setItem('tabId', Math.random().toString(36).slice(2, 10));
+}
+
+// Máquina de estados: 'lobby' | 'waiting' | 'game' | 'abandoned'
 export default function App() {
   const [page, setPage] = useState('lobby');
   const [gameState, setGameState] = useState(null);
   const [mySocketId, setMySocketId] = useState(null);
   const [roomCode, setRoomCode] = useState(null);
   const [error, setError] = useState(null);
+  const [abandonedBy, setAbandonedBy] = useState(null); // nome de quem saiu
 
   useEffect(() => {
-    // Reconexão: se há dados de sessão salvos, tenta rejoin automático
+    // Flag de closure: distingue erro de rejoin automático de erro de ação do usuário
+    let isRejoinPending = false;
+
     socket.on('connect', () => {
       setMySocketId(socket.id);
-      const savedRoom = sessionStorage.getItem('roomCode');
-      const savedIndex = sessionStorage.getItem('playerIndex');
-      if (savedRoom && savedIndex != null) {
+      const savedRoom  = localStorage.getItem('roomCode');
+      const savedIndex = localStorage.getItem('playerIndex');
+      const savedTabId = localStorage.getItem('tabId');
+      const myTabId    = sessionStorage.getItem('tabId');
+      if (savedRoom && savedIndex != null && myTabId && myTabId === savedTabId) {
+        isRejoinPending = true;
         socket.emit('rejoin-room', {
           roomCode: savedRoom,
           playerIndex: parseInt(savedIndex, 10),
@@ -31,9 +44,12 @@ export default function App() {
       setRoomCode(roomCode);
       setGameState(gameState);
       setError(null);
-      sessionStorage.setItem('roomCode', roomCode);
       const myIdx = gameState.players.findIndex(p => p.id === yourSocketId);
-      if (myIdx !== -1) sessionStorage.setItem('playerIndex', String(myIdx));
+      const tabId = Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('tabId', tabId);
+      localStorage.setItem('tabId', tabId);
+      localStorage.setItem('roomCode', roomCode);
+      if (myIdx !== -1) localStorage.setItem('playerIndex', String(myIdx));
       setPage('waiting');
     });
 
@@ -43,8 +59,11 @@ export default function App() {
       setGameState(gameState);
       setError(null);
       const myIdx = gameState.players.findIndex(p => p.id === yourSocketId);
-      sessionStorage.setItem('roomCode', gameState.roomCode);
-      if (myIdx !== -1) sessionStorage.setItem('playerIndex', String(myIdx));
+      const tabId = Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('tabId', tabId);
+      localStorage.setItem('tabId', tabId);
+      localStorage.setItem('roomCode', gameState.roomCode);
+      if (myIdx !== -1) localStorage.setItem('playerIndex', String(myIdx));
       setPage('waiting');
     });
 
@@ -54,6 +73,7 @@ export default function App() {
     });
 
     socket.on('rejoined', ({ yourSocketId, gameState }) => {
+      isRejoinPending = false;
       setMySocketId(yourSocketId);
       setRoomCode(gameState.roomCode);
       setGameState(gameState);
@@ -74,7 +94,37 @@ export default function App() {
       setGameState(gameState);
     });
 
+    // Oponente saiu intencionalmente
+    socket.on('player-left', ({ playerName }) => {
+      localStorage.removeItem('roomCode');
+      localStorage.removeItem('playerIndex');
+      localStorage.removeItem('tabId');
+      sessionStorage.removeItem('tabId');
+      setAbandonedBy(playerName);
+      setPage('abandoned');
+    });
+
+    // Confirmação: eu saí com sucesso
+    socket.on('left-room', () => {
+      localStorage.removeItem('roomCode');
+      localStorage.removeItem('playerIndex');
+      localStorage.removeItem('tabId');
+      sessionStorage.removeItem('tabId');
+      setGameState(null);
+      setRoomCode(null);
+      setAbandonedBy(null);
+      setPage('lobby');
+    });
+
     socket.on('error', ({ message }) => {
+      if (isRejoinPending) {
+        isRejoinPending = false;
+        localStorage.removeItem('roomCode');
+        localStorage.removeItem('playerIndex');
+        localStorage.removeItem('tabId');
+        sessionStorage.removeItem('tabId');
+        return;
+      }
       setError(message);
     });
 
@@ -86,6 +136,8 @@ export default function App() {
       socket.off('rejoined');
       socket.off('game-state-update');
       socket.off('player-disconnected');
+      socket.off('player-left');
+      socket.off('left-room');
       socket.off('error');
     };
   }, []);
@@ -98,11 +150,31 @@ export default function App() {
     setError(null);
   }
 
+  function handleBackToLobby() {
+    localStorage.removeItem('roomCode');
+    localStorage.removeItem('playerIndex');
+    localStorage.removeItem('tabId');
+    sessionStorage.removeItem('tabId');
+    setAbandonedBy(null);
+    setGameState(null);
+    setRoomCode(null);
+    setPage('lobby');
+  }
+
   if (page === 'lobby') {
     return <LobbyPage error={error} onClearError={handleClearError} />;
   }
   if (page === 'waiting') {
-    return <WaitingPage roomCode={roomCode} gameState={gameState} mySocketId={mySocketId} />;
+    return (
+      <WaitingPage
+        roomCode={roomCode}
+        gameState={gameState}
+        mySocketId={mySocketId}
+      />
+    );
+  }
+  if (page === 'abandoned') {
+    return <AbandonedScreen playerName={abandonedBy} onBackToLobby={handleBackToLobby} />;
   }
   return (
     <GamePage

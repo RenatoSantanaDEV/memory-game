@@ -1,7 +1,7 @@
 'use strict';
 
-const SYMBOLS = ['🦁','🦊','🐸','🐬','🦋','🌺','⭐','🍄','🎩','🔮','🎸','🦚','🍉','🐉','🏆','🎭'];
-const TOTAL_PAIRS = 8;
+const SYMBOLS = ['👑','💎','🦁','⭐','🍄','🌺','🐬','🧪','🌙','🔥','🦊','🦋','🎩','🔮','🐉','🏆'];
+const TOTAL_PAIRS = 10;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -52,6 +52,7 @@ class ServerMemoryGame {
     this.matchHistory = [];
     this.eventLog = [];
     this.phase = 'waiting';
+    this.restartVotes = new Set(); // socket IDs que votaram por revanche
   }
 
   addPlayer(socketId, name) {
@@ -147,6 +148,15 @@ class ServerMemoryGame {
     return { action: 'resolved' };
   }
 
+  voteRestart(socketId) {
+    if (this.phase !== 'over') return { error: 'game-not-over' };
+    if (!this.players.some(p => p.id === socketId)) return { error: 'not-a-player' };
+    this.restartVotes.add(socketId);
+    const allVoted = this.restartVotes.size >= 2;
+    if (allVoted) this.restart();
+    return { allVoted };
+  }
+
   restart() {
     this.players.forEach(p => { p.score = 0; p.attempts = 0; });
     this.cards = [];
@@ -157,6 +167,7 @@ class ServerMemoryGame {
     this.isOver = false;
     this.matchHistory = [];
     this.eventLog = [];
+    this.restartVotes = new Set();
     this.phase = 'playing';
     this._initCards();
     this._log(`Nova partida! Vez de ${this.players[0].name}.`);
@@ -219,7 +230,55 @@ class ServerMemoryGame {
       eventLog: this.eventLog,
       winner: winner ? { id: winner.id, name: winner.name, score: winner.score, playerIndex: winner.playerIndex } : null,
       remainingSymbols: this.getRemainingSymbols(),
+      restartVoteCount: this.restartVotes.size,
+      restartVotedIds: [...this.restartVotes],
     };
+  }
+
+  static fromNormalized({ phase, players, cards, state, matchHistory, eventLog }) {
+    const game = new ServerMemoryGame();
+    game.phase = phase;
+
+    game.players = players.map(p => {
+      const player = new ServerPlayer(p.socket_id || '', p.name, p.player_index);
+      player.score    = p.score;
+      player.attempts = p.attempts;
+      player.isConnected = false; // sempre desconectado ao restaurar
+      return player;
+    });
+
+    game.cards = cards.map(c => {
+      const card = new ServerCard(c.card_id, c.symbol, c.pair_id);
+      card.isFlipped = !!c.is_flipped;
+      card.isMatched = !!c.is_matched;
+      return card;
+    });
+
+    if (state) {
+      game.currentPlayerIndex = state.current_player_index;
+      game.isLocked           = !!state.is_locked;
+      game.isOver             = !!state.is_over;
+      game.matchCount         = state.match_count;
+      game.restartVotes       = new Set(JSON.parse(state.restart_vote_ids || '[]'));
+      game.flippedCards       = JSON.parse(state.flipped_card_ids || '[]')
+        .map(id => game.cards.find(c => c.id === id))
+        .filter(Boolean);
+    }
+
+    game.matchHistory = matchHistory.map(m => ({
+      matchNumber: m.match_number,
+      playerName:  m.player_name,
+      playerId:    null, // socket IDs são transitórios
+      playerIndex: m.player_index,
+      symbol:      m.symbol,
+    }));
+
+    game.eventLog = eventLog.map(e => ({
+      id:      e.sequence,
+      message: e.message,
+    }));
+
+    return game;
   }
 
   _switchPlayer() {

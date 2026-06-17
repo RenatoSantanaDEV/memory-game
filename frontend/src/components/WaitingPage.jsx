@@ -1,10 +1,16 @@
 import '../styles/lobby.css';
+import '../styles/game.css';
+import socket from '../socket';
 
 export default function WaitingPage({ roomCode, gameState, mySocketId }) {
   const myPlayer = gameState?.players.find(p => p.id === mySocketId);
 
   function copyCode() {
     navigator.clipboard.writeText(roomCode).catch(() => {});
+  }
+
+  function handleLeave() {
+    socket.emit('leave-room', { roomCode });
   }
 
   return (
@@ -57,6 +63,10 @@ export default function WaitingPage({ roomCode, gameState, mySocketId }) {
               Jogadores conectados! Iniciando...
             </p>
           )}
+
+          <button className="leave-btn" onClick={handleLeave} style={{ marginTop: '8px' }}>
+            Cancelar e Sair
+          </button>
         </div>
       </div>
     </div>

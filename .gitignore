@@ -9,8 +9,14 @@ frontend/.vite/
 
 # Variáveis de ambiente
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.*.example
+
+# Banco de dados SQLite
+*.db
+*.db-shm
+*.db-wal
 
 # Logs
 *.log

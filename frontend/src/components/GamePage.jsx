@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import '../styles/game.css';
 import socket from '../socket';
 import Card from './Card';
@@ -9,21 +9,40 @@ import EventLog from './EventLog';
 import RemainingSymbols from './RemainingSymbols';
 import StatusMessage from './StatusMessage';
 import GameOverModal from './GameOverModal';
+import GameFooter from './GameFooter';
+import SettingsModal from './SettingsModal';
 
 export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCode }) {
   const { cards, players, currentPlayerIndex, isLocked, flippedCardIds, phase } = gameState;
 
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+
   const isMyTurn = players[currentPlayerIndex]?.id === mySocketId;
 
-  // Após o delay de animação (1100ms), o cliente que errou avisa o servidor para destravar
+  // Timer — stops when game ends
+  useEffect(() => {
+    if (phase === 'over') return;
+    const id = setInterval(() => setTimeElapsed(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  // Reset timer when a new game starts (matchHistory empties and eventLog resets)
+  useEffect(() => {
+    if (gameState.matchHistory.length === 0 && gameState.eventLog.length <= 1) {
+      setTimeElapsed(0);
+    }
+  }, [gameState.matchHistory.length, gameState.eventLog.length]);
+
+  // After mismatch delay, the active client unlocks the board
   useEffect(() => {
     const noMatchPending = isLocked && flippedCardIds.length === 2;
     if (!noMatchPending || !isMyTurn) return;
-
     const timer = setTimeout(() => {
       socket.emit('resolve-no-match', { roomCode });
     }, 1100);
-
     return () => clearTimeout(timer);
   }, [isLocked, flippedCardIds.length, isMyTurn, roomCode]);
 
@@ -32,16 +51,21 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
     socket.emit('flip-card', { roomCode, cardId });
   }
 
-  function handleRestart() {
-    socket.emit('restart-game', { roomCode });
+  function handleLeave() {
+    socket.emit('leave-room', { roomCode });
   }
 
-  // Verifica se o oponente está desconectado
+  function handleRestart() {
+    socket.emit('vote-restart', { roomCode });
+  }
+
   const opponent = players.find((_, i) => i !== myPlayerIndex);
   const opponentDisconnected = opponent && !opponent.isConnected;
 
+  const mismatchCardIds = (isLocked && flippedCardIds.length === 2) ? flippedCardIds : [];
+
   return (
-    <>
+    <div className={`game-page-wrapper${animationsEnabled ? '' : ' animations-disabled'}`}>
       {opponentDisconnected && (
         <div className="disconnected-banner">
           {opponent.name} desconectou. Aguardando reconexão...
@@ -49,15 +73,27 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
       )}
 
       <header className="game-header">
-        <div className="header-left">
-          <span className="header-suits">♠ ♥ ♦ ♣</span>
-          <span className="header-title">Jogo da Memória</span>
+        <div className="header-suits">
+          <span className="suit-club">♣</span>
+          <span className="suit-diam">♦</span>
+          <span className="suit-heart">♥</span>
+          <span className="suit-spade">♠</span>
         </div>
-        {phase === 'over' && (
-          <button className="restart-btn" onClick={handleRestart}>
-            ↺ Nova Partida
+
+        <h1 className="header-title">Jogo da Memória</h1>
+
+        <div className="header-right">
+          <div className="room-badge">
+            SALA: <strong>{roomCode}</strong>
+          </div>
+          <button
+            className="settings-btn"
+            onClick={() => setShowSettings(true)}
+            aria-label="Configurações"
+          >
+            ⚙
           </button>
-        )}
+        </div>
       </header>
 
       <main className="game-layout">
@@ -76,6 +112,7 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
                 onClick={handleCardClick}
                 isMyTurn={isMyTurn}
                 isLocked={isLocked}
+                isMismatch={mismatchCardIds.includes(card.id)}
               />
             ))}
           </div>
@@ -88,9 +125,33 @@ export default function GamePage({ gameState, mySocketId, myPlayerIndex, roomCod
         </aside>
       </main>
 
+      <GameFooter
+        timeElapsed={timeElapsed}
+        gameState={gameState}
+        soundEnabled={soundEnabled}
+        onSoundToggle={() => setSoundEnabled(s => !s)}
+        onLeave={handleLeave}
+        onRestart={handleRestart}
+      />
+
       {phase === 'over' && (
-        <GameOverModal gameState={gameState} roomCode={roomCode} />
+        <GameOverModal
+          gameState={gameState}
+          roomCode={roomCode}
+          mySocketId={mySocketId}
+          timeElapsed={timeElapsed}
+        />
       )}
-    </>
+
+      {showSettings && (
+        <SettingsModal
+          soundEnabled={soundEnabled}
+          animationsEnabled={animationsEnabled}
+          onSoundToggle={() => setSoundEnabled(s => !s)}
+          onAnimationsToggle={() => setAnimationsEnabled(a => !a)}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+    </div>
   );
 }

@@ -12,6 +12,7 @@ export default function TurnIndicator({ players, currentPlayerIndex }) {
               key={p.id}
               className={['turn-player', colorClass, isActive ? 'active-turn' : ''].filter(Boolean).join(' ')}
             >
+              <span className="turn-arrow">▶</span>
               <span className="turn-suit">{suit}</span>
               {p.name}
             </div>
